@@ -1,5 +1,0 @@
-# depslib dependency file v1.0
-1539935272 source:/home/student/Github/2018_labo_beeldinterpretatie_JosseVanDelm/sessie0/sessie0/main.cpp
-	<iostream>
-	<opencv2/opencv.hpp>
-
