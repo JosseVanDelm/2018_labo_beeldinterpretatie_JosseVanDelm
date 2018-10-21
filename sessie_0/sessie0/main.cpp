@@ -27,7 +27,6 @@ int main(int argc, const char** argv)
         parser.printMessage();
         return -1;
     }
-
     // load and show grayscale image
     Mat image;
     image = imread(image_gray_location);
