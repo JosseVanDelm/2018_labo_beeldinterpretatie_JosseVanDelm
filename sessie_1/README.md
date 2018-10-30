@@ -1,3 +1,18 @@
+# Gebruik code
+
+voor een overzicht van alle commando's kan hulp gevraagd worden via de `--help`-vlag.
+Overzicht van andere vlaggen:
+* `--image` zet het pad naar de afbeelding die door de pipeline gestuurd moet worden.
+* `--mode` kan een waarde aannemen van:
+    * `0` voor "skin segmentation" (opdracht 1.1 deel 1).
+    * `1` voor "text segmentation" (opdracht 1.1 deel 2).
+    * `2` voor een geavanceerdere versie van "skin segmentation" die convexHull approximation gebruikt. (opdracht 1.2)
+
+**Je kan voor het afbeeldingspad best een absoluut pad gebruiken in Code::blocks**.
+
+Hieronder staat voor de volledigheid nog eens de opdracht.
+Om door de verschillende delen van de pipeline te gaan druk je telkens op **een willekeurige toets** op het toetsenbord.
+
 # Sessie 1 - pixel manipulatie
 
 ## Opdracht 1.1: Thresholding
