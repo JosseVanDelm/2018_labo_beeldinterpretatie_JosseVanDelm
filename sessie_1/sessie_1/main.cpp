@@ -9,7 +9,6 @@ using namespace cv;
 
 int main(int argc, const char** argv)
 {
-    ///OPDRACHT 1.1
     // Adding a command line parser
     CommandLineParser parser(argc, argv,
         "{help h usage ?  | | show this message }"
