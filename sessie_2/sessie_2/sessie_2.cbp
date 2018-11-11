@@ -11,7 +11,7 @@
 				<Option object_output="obj/Debug/" />
 				<Option type="1" />
 				<Option compiler="gcc" />
-				<Option parameters='--image1=&quot;/home/student/Github/2018_labo_beeldinterpretatie_VanDelm_Josse/sessie_2/sign.jpg&quot;  --image2=&quot;/home/student/Github/2018_labo_beeldinterpretatie_VanDelm_Josse/sessie_2/sign2.jpg&quot;  --image3=&quot;/home/student/Github/2018_labo_beeldinterpretatie_VanDelm_Josse/sessie_2/sign3.jpg&quot;  --image4=&quot;/home/student/Github/2018_labo_beeldinterpretatie_VanDelm_Josse/sessie_2/sign4.jpg&quot;' />
+				<Option parameters='--image1=&quot;/media/josse/Fedora/home/jossevandelm/beeldinterpretatie/2018_labo_beeldinterpretatie_VanDelm_Josse/sessie_2/sign.jpg&quot; --image2=&quot;/media/josse/Fedora/home/jossevandelm/beeldinterpretatie/2018_labo_beeldinterpretatie_VanDelm_Josse/sessie_2/sign2.jpg&quot; --image3=&quot;/media/josse/Fedora/home/jossevandelm/beeldinterpretatie/2018_labo_beeldinterpretatie_VanDelm_Josse/sessie_2/sign3.jpg&quot; --image4=&quot;/media/josse/Fedora/home/jossevandelm/beeldinterpretatie/2018_labo_beeldinterpretatie_VanDelm_Josse/sessie_2/sign4.jpg&quot;' />
 				<Compiler>
 					<Add option="-g" />
 				</Compiler>
