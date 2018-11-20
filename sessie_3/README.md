@@ -4,19 +4,22 @@
 De fout is aangegeven in de code in commentaar, zie ook `FIXME`.
 Ik probeer een mask toe te passen op de afbeelding die bekomen wordt door correlatie, maar dit werkt niet:
 
-`OpenCV(3.4.1) Error: Sizes of input arguments do not match (The operation is neither 'array op array' (where arrays have the same size and type), nor 'array op scalar', nor 'scalar op array') in binary_op, file /builddir/build/BUILD/opencv-3.4.1/modules/core/src/arithm.cpp, line 225
+```
+OpenCV(3.4.1) Error: Sizes of input arguments do not match (The operation is neither 'array op array' (where arrays have the same size and type), nor 'array op scalar', nor 'scalar op array') in binary_op, file /builddir/build/BUILD/opencv-3.4.1/modules/core/src/arithm.cpp, line 225
 terminate called after throwing an instance of 'cv::Exception'
   what():  OpenCV(3.4.1) /builddir/build/BUILD/opencv-3.4.1/modules/core/src/arithm.cpp:225: error: (-209) The operation is neither 'array op array' (where arrays have the same size and type), nor 'array op scalar', nor 'scalar op array' in function binary_op
 
 Process returned -1 (0xFFFFFFFF)   execution time : 10.267 s
-Press ENTER to continue.`
+Press ENTER to continue. 
+```
 
 De lijnnummers die weergegeven zijn in errormessage kunnen veschillen, maar het komt neer op de lijn met het `FIXME` statement.
 
 Het gebruik van de code is heel simpel, je kan volgende argumenten gebruiken:
 * `--help` om de help te laten zien.
 * `--matching_image` om het (best absolute) pad naar de afbeelding in te stellen waarop aan template matching wordt gedaan.
-* `--
+* `--template` om de template (ook best via absoluut pad!) in te stellen.
+Hieronder is nog eens een kopie van de oorspronkelijke opdracht:
 
 # Sessie 3 - template based matching
 
