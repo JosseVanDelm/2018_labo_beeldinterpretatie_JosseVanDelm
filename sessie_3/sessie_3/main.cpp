@@ -4,6 +4,18 @@
 using namespace std;
 using namespace cv;
 
+/*vvv | Error marked with FIXME below | vvv*/
+
+/*Current error (@ Runtime):
+ * 
+OpenCV(3.4.1) Error: Sizes of input arguments do not match (The operation is neither 'array op array' (where arrays have the same size and type), nor 'array op scalar', nor 'scalar op array') in binary_op, file /builddir/build/BUILD/opencv-3.4.1/modules/core/src/arithm.cpp, line 225
+terminate called after throwing an instance of 'cv::Exception'
+  what():  OpenCV(3.4.1) /builddir/build/BUILD/opencv-3.4.1/modules/core/src/arithm.cpp:225: error: (-209) The operation is neither 'array op array' (where arrays have the same size and type), nor 'array op scalar', nor 'scalar op array' in function binary_op
+
+Process returned -1 (0xFFFFFFFF)   execution time : 10.267 s
+Press ENTER to continue.
+*/
+
 ///Program options: --matching_image="/home/student/Github/2018_labo_beeldinterpretatie_VanDelm_Josse/sessie_3/recht.jpg"
 ///                 --template="/home/student/Github/2018_labo_beeldinterpretatie_VanDelm_Josse/sessie_3/template.jpg"
 ///or:              --matching_image="/home/jossevandelm/beeldinterpretatie/2018_labo_beeldinterpretatie_VanDelm_Josse/sessie_3/recht.jpg"
@@ -100,25 +112,35 @@ int main(int argc, const char** argv){
     double minValue,maxValue;
     Point minLocation,maxLocation;
     findContours(mask,contours,CV_RETR_EXTERNAL,CV_CHAIN_APPROX_NONE);
+    //Loop over different blobs separately
     for(size_t i = 0; i < contours.size();i++)
     {
+		// Create empty mask for each individual blob
         Mat individual_mask = Mat::zeros(Size(result_gs.cols,result_gs.rows),CV_8UC1);
         drawContours(individual_mask,contours,i,1,CV_FILLED);
         imshow("Various blobs",individual_mask*255);
         Mat masked;
-        masked = individual_mask & result_gs;
+		// Apply mask on match map
+		masked = individual_mask & result_gs; // <-- FIXME This line doesn't do what it is supposed to
+		// These rows were added for debugging purposes
         cerr << individual_mask.rows << endl << individual_mask.cols << endl;
         cerr << "++++++" << endl;
         cerr << result_gs.rows << endl << result_gs.cols << endl;
         waitKey();
-        //minMaxLoc(,&minValue,&maxValue,&minLocation,&maxLocation);
-        //maxima.push_back(maxLocation);
+		// Find local maximum for each blob
+       	minMaxLoc(masked,&minValue,&maxValue,&minLocation,&maxLocation);
+		// Add found position of local maximum to array
+        maxima.push_back(maxLocation);
     }
-
-    //
-    /*double minVal,maxVal;
-    Point minLoc,maxLoc,matchLoc;
-    minMaxLoc( result, &minVal, &maxVal, &minLoc, &maxLoc, Mat() );
-    // Display the maximum
-*/
+	// Make final display image
+	Mat display_multiple_result;
+	matching_image.copyTo(display_multiple_result);
+    for(size_t i = 0; i < maxima.size(); i++)
+	{
+		// Draw rectangles on found maximum positions
+    	rectangle(display_multiple_result,maxima[i],Point(maxima[i].x+template_size.width,maxima[i].y+template_size.height),Scalar(0,255,0),1);
+	}
+	// Display final image
+	imshow("Final image with all matches",display_multiple_result);
+	waitKey();
 }
