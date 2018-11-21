@@ -7,7 +7,7 @@ using namespace cv;
 /*vvv | Error marked with FIXME below | vvv*/
 
 /*Current error (@ Runtime):
- * 
+ *
 OpenCV(3.4.1) Error: Sizes of input arguments do not match (The operation is neither 'array op array' (where arrays have the same size and type), nor 'array op scalar', nor 'scalar op array') in binary_op, file /builddir/build/BUILD/opencv-3.4.1/modules/core/src/arithm.cpp, line 225
 terminate called after throwing an instance of 'cv::Exception'
   what():  OpenCV(3.4.1) /builddir/build/BUILD/opencv-3.4.1/modules/core/src/arithm.cpp:225: error: (-209) The operation is neither 'array op array' (where arrays have the same size and type), nor 'array op scalar', nor 'scalar op array' in function binary_op
@@ -119,14 +119,19 @@ int main(int argc, const char** argv){
         Mat individual_mask = Mat::zeros(Size(result_gs.cols,result_gs.rows),CV_8UC1);
         drawContours(individual_mask,contours,i,1,CV_FILLED);
         imshow("Various blobs",individual_mask*255);
-        Mat masked;
+        imshow("result_1C_gs",result_gs);
+        waitKey(0);
+        Mat masked = Mat::zeros(Size(result_gs.cols,result_gs.rows),CV_8UC1);
 		// Apply mask on match map
-		masked = individual_mask & result_gs; // <-- FIXME This line doesn't do what it is supposed to
+		result_gs.copyTo(masked, individual_mask);
+        imshow("masked",masked);
+        waitKey(0);
 		// These rows were added for debugging purposes
         cerr << individual_mask.rows << endl << individual_mask.cols << endl;
         cerr << "++++++" << endl;
         cerr << result_gs.rows << endl << result_gs.cols << endl;
-        waitKey();
+        cerr << "======" << endl;
+        waitKey(0);
 		// Find local maximum for each blob
        	minMaxLoc(masked,&minValue,&maxValue,&minLocation,&maxLocation);
 		// Add found position of local maximum to array

@@ -11,7 +11,7 @@
 				<Option object_output="obj/Debug/" />
 				<Option type="1" />
 				<Option compiler="gcc" />
-				<Option parameters='--matching_image=&quot;/home/jossevandelm/beeldinterpretatie/2018_labo_beeldinterpretatie_VanDelm_Josse/sessie_3/recht.jpg&quot; --template=&quot;/home/jossevandelm/beeldinterpretatie/2018_labo_beeldinterpretatie_VanDelm_Josse/sessie_3/template.jpg&quot;' />
+				<Option parameters='--matching_image=&quot;/home/student/Github/2018_labo_beeldinterpretatie_VanDelm_Josse/sessie_3/recht.jpg&quot; --template=&quot;/home/student/Github/2018_labo_beeldinterpretatie_VanDelm_Josse/sessie_3/template.jpg&quot;' />
 				<Compiler>
 					<Add option="-g" />
 				</Compiler>
@@ -36,6 +36,9 @@
 			<Add option="-Wall" />
 			<Add option="-fexceptions" />
 		</Compiler>
+		<Linker>
+			<Add option="`pkg-config opencv --libs`" />
+		</Linker>
 		<Unit filename="main.cpp" />
 		<Extensions>
 			<code_completion />
