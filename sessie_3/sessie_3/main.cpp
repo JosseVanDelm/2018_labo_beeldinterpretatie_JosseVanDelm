@@ -4,18 +4,6 @@
 using namespace std;
 using namespace cv;
 
-/*vvv | Error marked with FIXME below | vvv*/
-
-/*Current error (@ Runtime):
- *
-OpenCV(3.4.1) Error: Sizes of input arguments do not match (The operation is neither 'array op array' (where arrays have the same size and type), nor 'array op scalar', nor 'scalar op array') in binary_op, file /builddir/build/BUILD/opencv-3.4.1/modules/core/src/arithm.cpp, line 225
-terminate called after throwing an instance of 'cv::Exception'
-  what():  OpenCV(3.4.1) /builddir/build/BUILD/opencv-3.4.1/modules/core/src/arithm.cpp:225: error: (-209) The operation is neither 'array op array' (where arrays have the same size and type), nor 'array op scalar', nor 'scalar op array' in function binary_op
-
-Process returned -1 (0xFFFFFFFF)   execution time : 10.267 s
-Press ENTER to continue.
-*/
-
 ///Program options: --matching_image="/home/student/Github/2018_labo_beeldinterpretatie_VanDelm_Josse/sessie_3/recht.jpg"
 ///                 --template="/home/student/Github/2018_labo_beeldinterpretatie_VanDelm_Josse/sessie_3/template.jpg"
 ///or:              --matching_image="/home/jossevandelm/beeldinterpretatie/2018_labo_beeldinterpretatie_VanDelm_Josse/sessie_3/recht.jpg"
