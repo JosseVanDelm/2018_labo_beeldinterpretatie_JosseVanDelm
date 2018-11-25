@@ -74,15 +74,70 @@ int main(int argc, const char** argv){
     Ptr<AKAZE> detector_AKAZE = AKAZE::create();
 
     //  Early rejection on distances
-    for (size_t i = 0; i < count; i++) {
-      // find max
-      // find min (not zero)
-      // reject points not smaller than min*3
+    // set first distance as min and max, unless minimum is 0
+    float minimal_distance,maximal_distance;
+    minimal_distance = matches_ORB[0].distance;
+    if(minimal_distance == 0)
+    {
+	    minimal_distance = 1;
     }
-    //beste match = max kleinste distance en vice versa
-    //thresholden distances (alles verder dan 3 keer min distance weggooien)
-    //distances (goede matches) gebruiken om punten te definieren en daarmee homografie te berekenen
-    //findHomography
-    //doe homographt met perspective transform
-    //teken punten op match image!
+    maximal_distance = matches_ORB[0].distance;
+    for (size_t i = 1; i < matches_ORB.size(); i++)
+    {
+	float distance = matches_ORB[i].distance;
+	if(distance > maximal_distance)
+	{
+		maximal_distance = distance;
+	}
+	else if(distance < minimal_distance && distance !=0)
+	{
+		minimal_distance = distance;
+	}
+    }
+    // Treshold the found distances (only keep smaller than 3*minimum_distance)
+    // for early rejection of matches.
+    vector<DMatch> approved_matches;
+    for (size_t i = 0; i < matches_ORB.size(); i++)
+    {
+	   if(matches_ORB[i].distance <= minimal_distance*3)
+	   {
+		   approved_matches.push_back(matches_ORB[i]);
+	   }
+    }
+    vector<Point2f> object_points;
+    vector<Point2f> scene_points;
+    for (size_t i = 0; i < approved_matches.size();i++)
+    {
+	    int queryIndex = approved_matches[i].queryIdx;
+	    int trainIndex = approved_matches[i].trainIdx;
+	    object_points.push_back(keypoints_object_ORB[queryIndex].pt);
+	    scene_points.push_back(keypoints_scene_ORB[trainIndex].pt);
+    }
+    //find the Homography of the object image on the scene image
+    Mat Homography = findHomography(object_points,scene_points,RANSAC);
+    // use the corners of the object image to map a rectangle on the scene image:
+    vector<Point2f> object_corners;
+    object_corners.push_back(Point(0,0));
+    object_corners.push_back(Point(0,template_image.rows));
+    object_corners.push_back(Point(template_image.cols,template_image.rows));
+    object_corners.push_back(Point(template_image.cols,0));
+    vector<Point2f> scene_corners;
+    // Apply homography on object corners to find the corners in the scene
+    perspectiveTransform(object_corners,scene_corners,Homography);
+    // Draw transformed points on match image (slightly translate images to set them on the first image only)
+    Scalar green = Scalar(0,255,0);
+    for(size_t i = 0; i < object_corners.size(); i++)
+    {
+        cerr << object_corners[i] << endl;
+    }
+    for(size_t i = 0; i < object_corners.size(); i++)
+    {
+        cerr << scene_corners[i] << endl;
+    }
+    line(matching_image,scene_corners[0],scene_corners[1],green);
+    line(matching_image,scene_corners[1],scene_corners[2],green);
+    line(matching_image,scene_corners[2],scene_corners[3],green);
+    line(matching_image,scene_corners[3],scene_corners[0],green);
+    imshow("We found it !",matching_image);
+    waitKey(0);
 }
