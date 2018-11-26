@@ -47,15 +47,41 @@ int main(int argc, const char** argv){
     /// ORB -------------------------------------------
     // Construct detectors,keypointvectors,declare descriptors and images
     Ptr<ORB> detector_ORB = ORB::create();
+    Ptr<BRISK> detector_BRISK = BRISK::create();
+    Ptr<AKAZE> detector_AKAZE = AKAZE::create();
     vector<KeyPoint> keypoints_scene_ORB, keypoints_object_ORB;
-    Mat descriptors_scene_ORB, descriptors_object_ORB;
+    vector<KeyPoint> keypoints_scene_BRISK, keypoints_object_BRISK;
+    vector<KeyPoint> keypoints_scene_AKAZE, keypoints_object_AKAZE;
+    Mat descriptors_scene_ORB,   descriptors_object_ORB;
+    Mat descriptors_scene_BRISK, descriptors_object_BRISK;
+    Mat descriptors_scene_AKAZE, descriptors_object_AKAZE;
     Mat template_image_draw_keypoints_ORB, matching_image_draw_keypoints_ORB;
+    Mat template_image_draw_keypoints_BRISK, matching_image_draw_keypoints_BRISK;
+    Mat template_image_draw_keypoints_AKAZE, matching_image_draw_keypoints_AKAZE;
     // Detect keypoints and compute descriptors (Mat() for no mask)
     detector_ORB->detectAndCompute(template_image,Mat(),keypoints_object_ORB,descriptors_object_ORB);
     detector_ORB->detectAndCompute(matching_image,Mat(),keypoints_scene_ORB,descriptors_scene_ORB);
+    detector_BRISK->detectAndCompute(template_image,Mat(),keypoints_object_BRISK,descriptors_object_BRISK);
+    detector_BRISK->detectAndCompute(matching_image,Mat(),keypoints_scene_BRISK,descriptors_scene_BRISK);
+    detector_AKAZE->detectAndCompute(template_image,Mat(),keypoints_object_AKAZE,descriptors_object_AKAZE);
+    detector_AKAZE->detectAndCompute(matching_image,Mat(),keypoints_scene_AKAZE,descriptors_scene_AKAZE);
     // Draw detected Keypoints
     drawKeypoints(template_image,keypoints_object_ORB,template_image_draw_keypoints_ORB);
     drawKeypoints(matching_image,keypoints_scene_ORB,matching_image_draw_keypoints_ORB);
+    drawKeypoints(template_image,keypoints_object_BRISK,template_image_draw_keypoints_BRISK);
+    drawKeypoints(matching_image,keypoints_scene_BRISK,matching_image_draw_keypoints_BRISK);
+    drawKeypoints(template_image,keypoints_object_AKAZE,template_image_draw_keypoints_AKAZE);
+    drawKeypoints(matching_image,keypoints_scene_AKAZE,matching_image_draw_keypoints_AKAZE);
+    Mat template_image_draw_keypoints,matching_image_draw_keypoints;
+    // Concatenate images for better comparison
+    hconcat(template_image_draw_keypoints_ORB,template_image_draw_keypoints_BRISK,template_image_draw_keypoints);
+    hconcat(template_image_draw_keypoints_AKAZE,template_image_draw_keypoints,template_image_draw_keypoints);
+    hconcat(matching_image_draw_keypoints_ORB,matching_image_draw_keypoints_BRISK,matching_image_draw_keypoints);
+    hconcat(matching_image_draw_keypoints_AKAZE,matching_image_draw_keypoints,matching_image_draw_keypoints);
+    imshow("Key Points (Object) ORB | BRISK | AKAZE",template_image_draw_keypoints);
+    waitKey(0);
+    imshow("Key Points (Scene)  ORB | BRISK | AKAZE",matching_image_draw_keypoints);
+    waitKey(0);
     // Match the keypoints with bruteforce
     BFMatcher matcher(NORM_L2);
     vector<DMatch> matches_ORB;
@@ -64,14 +90,12 @@ int main(int argc, const char** argv){
     Mat img_matches_ORB;
     drawMatches(matching_image ,keypoints_scene_ORB,template_image,keypoints_object_ORB,matches_ORB, img_matches_ORB);
 
-    imshow("Key Points (ORB) - object",template_image_draw_keypoints_ORB);
-    imshow("Key Points (ORB) - scene ",matching_image_draw_keypoints_ORB);
-    imshow("Matches    (ORB)",img_matches_ORB);
+
+    imshow("Matches (ORB)",img_matches_ORB);
     waitKey(0);
 
     //BRISK en AKAZE kan fout geven bij bruteforce matching met L2_NORM
-    Ptr<BRISK> detector_BRISK = BRISK::create();
-    Ptr<AKAZE> detector_AKAZE = AKAZE::create();
+
 
     //  Early rejection on distances
     // set first distance as min and max, unless minimum is 0
