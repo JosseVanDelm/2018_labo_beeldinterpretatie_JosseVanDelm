@@ -43,8 +43,6 @@ int main(int argc, const char** argv){
     imshow("Template",template_image);
     waitKey(0);
     /// Search for features with ORB, BRISK and AKAZE.:
-    // TODO AKAZE/BRISK
-    /// ORB -------------------------------------------
     // Construct detectors,keypointvectors,declare descriptors and images
     Ptr<ORB> detector_ORB = ORB::create();
     Ptr<BRISK> detector_BRISK = BRISK::create();
@@ -85,17 +83,12 @@ int main(int argc, const char** argv){
     // Match the keypoints with bruteforce
     BFMatcher matcher(NORM_L2);
     vector<DMatch> matches_ORB;
-    matcher.match(descriptors_scene_ORB,descriptors_object_ORB,matches_ORB);
+    matcher.match(descriptors_object_ORB,descriptors_scene_ORB,matches_ORB);
     // Draw matches
     Mat img_matches_ORB;
-    drawMatches(matching_image ,keypoints_scene_ORB,template_image,keypoints_object_ORB,matches_ORB, img_matches_ORB);
-
-
+    drawMatches(template_image,keypoints_object_ORB,matching_image,keypoints_scene_ORB,matches_ORB,img_matches_ORB);
     imshow("Matches (ORB)",img_matches_ORB);
     waitKey(0);
-
-    //BRISK en AKAZE kan fout geven bij bruteforce matching met L2_NORM
-
 
     //  Early rejection on distances
     // set first distance as min and max, unless minimum is 0
