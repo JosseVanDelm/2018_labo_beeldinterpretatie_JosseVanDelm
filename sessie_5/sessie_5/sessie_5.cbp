@@ -11,9 +11,13 @@
 				<Option object_output="obj/Debug/" />
 				<Option type="1" />
 				<Option compiler="gcc" />
+				<Option parameters='--training_image=&quot;/media/josse/Fedora/home/jossevandelm/beeldinterpretatie/2018_labo_beeldinterpretatie_VanDelm_Josse/sessie_5/strawberry1.tif&quot; --inference_image=&quot;/media/josse/Fedora/home/jossevandelm/beeldinterpretatie/2018_labo_beeldinterpretatie_VanDelm_Josse/sessie_5/strawberry2.tif&quot;' />
 				<Compiler>
 					<Add option="-g" />
 				</Compiler>
+				<Linker>
+					<Add option="`pkg-config opencv --libs`" />
+				</Linker>
 			</Target>
 			<Target title="Release">
 				<Option output="bin/Release/sessie_5" prefix_auto="1" extension_auto="1" />

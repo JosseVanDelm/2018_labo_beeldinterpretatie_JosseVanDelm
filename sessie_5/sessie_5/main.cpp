@@ -5,35 +5,41 @@ using namespace std;
 using namespace cv;
 
 /* Program options:
---training_image=""
---inference_image=""
+--training_image="/media/josse/Fedora/home/jossevandelm/beeldinterpretatie/2018_labo_beeldinterpretatie_VanDelm_Josse/sessie_5/strawberry1.tif"
+--inference_image="/media/josse/Fedora/home/jossevandelm/beeldinterpretatie/2018_labo_beeldinterpretatie_VanDelm_Josse/sessie_5/strawberry2.tif"
 */
 ///LINKER: `pkg-config opencv --libs`
 // in param de lijst meegeven
-static void onMouse(int event,int x, int y, int, void* param){
-    switch(event) {
-    case EVENT_LBUTTONDOWN : addPoint( param);cerr << "(" << x << ","<< y << ") L" << endl; break;
-    case EVENT_RBUTTONDOWN : cerr << "(" << x << ","<< y << ") R" << endl; break;
-    case EVENT_MBUTTONDOWN : cerr << "(" << x << ","<< y << ") M" << endl; break;
+
+void addPoint(vector<Point2d> *Pointsptr,int x, int y){
+    cerr << "Point (" << x << ","<< y << ") added" << endl;
+    Pointsptr->push_back(Point(x,y));
+}
+
+void deletePoint(vector<Point2d> *Pointsptr){
+    if(Pointsptr->size() == 0)
+        cerr << "No (more) points to delete" << endl;
+    else
+    {
+        cerr << "Latest point deleted" << endl;
+        Pointsptr->pop_back();
     }
 }
 
-vector<Point2d> addPoint(vector<Point2d> Points,int x, int y){
-    cerr << "Point (" << x << ","<< y << ") added" << endl;
-    Points.push_back(Point(x,y));
-    return Points;
-}
-
-vector<Point2d> deletePoint(vector<Point2d> Points){
-    cerr << "Latest point deleted" << endl;
-    Points.pop_back();
-    return Points;
-}
-
-void showPoints(vector<Point2d> Points){
+void showPoints(vector<Point2d>  *Pointsptr){
+    vector<Point2d> Points = *Pointsptr;
     cerr << "Showing selected points" << endl << "=======================" << endl;
     for(size_t i = 0; i < Points.size(); i++){
-        cerr << "(" << Points[i].x << "," << Points[i].y << ")" << endl;
+        cerr << i << ". (" << Points[i].x << "," << Points[i].y << ")" << endl;
+    }
+}
+
+static void onMouse(int event,int x, int y, int, void* param){
+    vector<Point2d> *Points = static_cast<vector<Point2d> *>(param);
+    switch(event) {
+    case EVENT_LBUTTONDOWN : addPoint(Points,x,y);    break;
+    case EVENT_RBUTTONDOWN : deletePoint(Points);  break;
+    case EVENT_MBUTTONDOWN : showPoints(Points);   break;
     }
 }
 
@@ -64,10 +70,11 @@ int main(int argc, const char** argv){
         cerr<<"One of the images is not found";
         return -1;
     }
+    vector<Point2d> foregroundPoints;
     imshow("Add training data",training_image);
-    setMouseCallback("Add training data",onMouse,0);
+    setMouseCallback("Add training data",onMouse,&foregroundPoints);
     waitKey(0);
-
+/*
     //gaussian blur toevoegen om minder afhankelijk te zijn van pitjes
     // kies voor  knn 3 classen
 
@@ -104,5 +111,5 @@ int main(int argc, const char** argv){
     vconcat(labels_fg,labels_bg,labels);
 
     cerr << "Training a 1 Nearest Neighbor Classifier"
-
+*/
 }
