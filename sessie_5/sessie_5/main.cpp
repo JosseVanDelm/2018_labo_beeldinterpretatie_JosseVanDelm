@@ -103,4 +103,6 @@ int main(int argc, const char** argv){
     vconcat(trainingDataForeground,trainingDataBackground,trainingData);
     vconcat(labels_fg,labels_bg,labels);
 
+    cerr << "Training a 1 Nearest Neighbor Classifier"
+
 }
