@@ -9,11 +9,31 @@ using namespace cv;
 --inference_image=""
 */
 ///LINKER: `pkg-config opencv --libs`
-static void onMouse(int event,int x, int y, int, void*){
+// in param de lijst meegeven
+static void onMouse(int event,int x, int y, int, void* param){
     switch(event) {
-    case EVENT_LBUTTONDOWN : cerr << "(" << x << ","<< y << ") L" << endl; break;
+    case EVENT_LBUTTONDOWN : addPoint( param);cerr << "(" << x << ","<< y << ") L" << endl; break;
     case EVENT_RBUTTONDOWN : cerr << "(" << x << ","<< y << ") R" << endl; break;
     case EVENT_MBUTTONDOWN : cerr << "(" << x << ","<< y << ") M" << endl; break;
+    }
+}
+
+vector<Point2d> addPoint(vector<Point2d> Points,int x, int y){
+    cerr << "Point (" << x << ","<< y << ") added" << endl;
+    Points.push_back(Point(x,y));
+    return Points;
+}
+
+vector<Point2d> deletePoint(vector<Point2d> Points){
+    cerr << "Latest point deleted" << endl;
+    Points.pop_back();
+    return Points;
+}
+
+void showPoints(vector<Point2d> Points){
+    cerr << "Showing selected points" << endl << "=======================" << endl;
+    for(size_t i = 0; i < Points.size(); i++){
+        cerr << "(" << Points[i].x << "," << Points[i].y << ")" << endl;
     }
 }
 
@@ -47,4 +67,40 @@ int main(int argc, const char** argv){
     imshow("Add training data",training_image);
     setMouseCallback("Add training data",onMouse,0);
     waitKey(0);
+
+    //gaussian blur toevoegen om minder afhankelijk te zijn van pitjes
+    // kies voor  knn 3 classen
+
+    //retrieving the hsv pixel values for each position
+    Mat img_hsv
+    cvtColor ...
+
+    //Prepare foreground training data using the HSV values as a descriptor
+
+    Mat trainingDataForeground(strawberry.size(),3,CV_32FC1); //strawberry zijn de punten geselecteerd.
+    Mat labels_fg = Mat::ones(strawberry.size(),1,CV_32SC1);
+
+    for (int i = 0; i < strawberry.size(); i++) {
+        Vec3b descriptor = img_hsv.at<Vec3b>(strawberry[i].y,strawberry[i].x);
+        trainingDataForeground.at<float>(i,0) = descriptor[0];
+        trainingDataForeground.at<float>(i,0) = descriptor[0];
+        trainingDataForeground.at<float>(i,0) = descriptor[0];
+    }
+
+    //Prepare background training data using the HSV values as a descriptor
+    Mat trainingDataBackground(strawberry.size(),3,CV_32FC1); //strawberry zijn de punten geselecteerd.
+    Mat labels_fg = Mat::ones(strawberry.size(),1,CV_32SC1);
+
+    for (int i = 0; i < strawberry.size(); i++) {
+        Vec3b descriptor = img_hsv.at<Vec3b>(strawberry[i].y,strawberry[i].x);
+        trainingDataBackground.at<float>(i,0) = descriptor[0];
+        trainingDataBackground.at<float>(i,0) = descriptor[0];
+        trainingDataBackground.at<float>(i,0) = descriptor[0];
+    }
+
+    // group foreground and background
+    Mat trainingData, labels;
+    vconcat(trainingDataForeground,trainingDataBackground,trainingData);
+    vconcat(labels_fg,labels_bg,labels);
+
 }
