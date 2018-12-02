@@ -104,7 +104,7 @@ int main(int argc, const char** argv){
 
     //Prepare background training data using the HSV values as a descriptor
     Mat trainingDataBackground(backgroundPoints.size(),3,CV_32FC1); //strawberry zijn de punten geselecteerd.
-    Mat labels_bg = Mat::ones(backgroundPoints.size(),1,CV_32SC1);
+    Mat labels_bg = Mat::zeros(backgroundPoints.size(),1,CV_32SC1);
 
     for (size_t i = 0; i < backgroundPoints.size(); i++) {
         Vec3b descriptor = img_hsv.at<Vec3b>(backgroundPoints[i].y,backgroundPoints[i].x);
@@ -152,8 +152,8 @@ int main(int argc, const char** argv){
     Mat mask_SVM = Mat::zeros(imageSize,CV_8UC1);
     Mat labels_KNN, labels_NB, labels_SVM;
     cerr << "Classifying individual pixels...  ";
-    for(int row = 0; row < img_hsv.rows ; row++){
-        for(int col = 0; col < img_hsv.cols; col++){
+    for(int row = 0; row < imageSize.height ; row++){
+        for(int col = 0; col < imageSize.width; col++){
             // store individual pixel in CV_32FC1 matrix)
             Vec3b pixel = img_hsv.at<Vec3b>(row,col);
             Mat pixel_new(1,3,CV_32FC1);
@@ -163,13 +163,10 @@ int main(int argc, const char** argv){
             KNN->findNearest(pixel_new, KNN->getDefaultK(), labels_KNN);
              NB->predict(pixel_new, labels_NB );
             SVM->predict(pixel_new, labels_SVM);
-            // Now use labels as masks
-            if(labels_KNN.at<float>(row,col) != 0){
-                mask_KNN.at<uchar>(row,col) = 1;
-            }
-            //mask_KNN.at<uchar>(row,col) = labels_KNN.at<float>(row,col);
-            mask_NB.at<uchar>(row,col) =  labels_NB.at<int>(row,col);
-            mask_SVM.at<uchar>(row,col) = labels_SVM.at<float>(row,col);
+            // Now use label as masks
+            mask_KNN.at<uchar>(row,col) = labels_KNN.at<float>(0,0);
+            mask_NB.at<uchar>(row,col) =  labels_NB.at<int>(0,0); //nb uses ints!
+            mask_SVM.at<uchar>(row,col) = labels_SVM.at<float>(0,0);
         }
     }
     cerr << "done" << endl;
@@ -177,5 +174,56 @@ int main(int argc, const char** argv){
     imshow("Mask Normal Bayes Classifier",mask_NB*255);
     imshow("Mask Support Vector Machine Classifier",mask_SVM*255);
     waitKey(0);
-
+    destroyAllWindows(); // close older windows
+    // apply masks on original image
+    Mat img_masked_KNN,img_masked_NB, img_masked_SVM;
+    training_image.copyTo(img_masked_KNN,mask_KNN);
+    training_image.copyTo(img_masked_NB,mask_NB);
+    training_image.copyTo(img_masked_SVM,mask_SVM);
+    imshow("k Nearest Neighbors Classifier",img_masked_KNN);
+    imshow("Normal Bayes Classifier",img_masked_NB);
+    imshow("Support Vector Machine Classifier",img_masked_SVM);
+    waitKey(0);
+    destroyAllWindows(); // close older windows
+    //Now do the same classification on inference image
+    GaussianBlur(inference_image,img_gaussian,Size(11,11),0,0);
+    cvtColor(img_gaussian,img_hsv,CV_BGR2HSV);
+    imageSize = Size(inference_image.cols,inference_image.rows);
+    mask_KNN = Mat::zeros(imageSize,CV_8UC1);
+    mask_NB  = Mat::zeros(imageSize,CV_8UC1);
+    mask_SVM = Mat::zeros(imageSize,CV_8UC1);
+    cerr << endl << "|Inference| " << endl << endl;
+    cerr << "Classifying individual pixels...  ";
+    for(int row = 0; row < imageSize.height ; row++){
+        for(int col = 0; col < imageSize.width; col++){
+            // store individual pixel in CV_32FC1 matrix)
+            Vec3b pixel = img_hsv.at<Vec3b>(row,col);
+            Mat pixel_new(1,3,CV_32FC1);
+            pixel_new.at<float>(0,0) = pixel[0];
+            pixel_new.at<float>(0,1) = pixel[1];
+            pixel_new.at<float>(0,2) = pixel[2];
+            KNN->findNearest(pixel_new, KNN->getDefaultK(), labels_KNN);
+             NB->predict(pixel_new, labels_NB );
+            SVM->predict(pixel_new, labels_SVM);
+            // Now use label as masks
+            mask_KNN.at<uchar>(row,col) = labels_KNN.at<float>(0,0);
+            mask_NB.at<uchar>(row,col) =  labels_NB.at<int>(0,0); //nb uses ints!
+            mask_SVM.at<uchar>(row,col) = labels_SVM.at<float>(0,0);
+        }
+    }
+    cerr << "done" << endl;
+    imshow("Mask k Nearest Neighbor Classifier",mask_KNN*255);
+    imshow("Mask Normal Bayes Classifier",mask_NB*255);
+    imshow("Mask Support Vector Machine Classifier",mask_SVM*255);
+    waitKey(0);
+    destroyAllWindows(); // close older windows
+    // apply masks on original image
+    inference_image.copyTo(img_masked_KNN,mask_KNN);
+    inference_image.copyTo(img_masked_NB,mask_NB);
+    inference_image.copyTo(img_masked_SVM,mask_SVM);
+    imshow("k Nearest Neighbors Classifier",img_masked_KNN);
+    imshow("Normal Bayes Classifier",img_masked_NB);
+    imshow("Support Vector Machine Classifier",img_masked_SVM);
+    waitKey(0);
+    return 0;
 }

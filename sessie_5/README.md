@@ -1,3 +1,24 @@
+# Gebruik code
+Dit programma classificeert rijpe aardbeien.
+* gebruik `--training_image=` met het absolute pad naar de afbeelding om een afbeelding te kiezen om op te trainen.
+* gebruik `--inference_image=` met het absolute pad naar de afbeelding om een afbeelding te kiezen om de inferentie op uit te voeren.
+* gebruik `--help` als je een beetje in de war bent of als je geen zin hebt om deze documentatie te lezen en het allemaal liever zelf uitzoekt.
+
+Gebruik eender welke toets om door het programma te navigeren.
+Om punten aan te duiden kan je de muis gebruiken:
+* **linkermuisknop** voegt een punt toe.
+* **rechtermuisknop** verwijdert het laatst toegevoegde punt.
+* **middelmuisknop** laat een lijst zien van alle geselecteerde punten.
+
+**Tips om te trainen:**
+* Duid de aardbeien aan indien er gevraagd word om *foreground* te selecteren.
+* Duid al de rest aan indien er gevraagd word om *background* te selecteren.
+  Duid ook zeker onrijpe aardbeien aan bij background, dit verbeterd de resultaten.
+
+**Het programma werkt niet als er geen punten gekozen worden om op te trainen**
+
+Voor de volledigheid staat hieronder nog eens de volledige opdracht:
+
 # Sessie 5 - Machine Learning
 
 Een aardbei plukker wil graag mee gaan met de tijd en wil zijn manuele arbeid
@@ -22,4 +43,3 @@ rijpe aarbeien te detecteren.
 
 * **EXTRA**: Hoe kan je de segmentatie verbeteren? Denk na over het feit dat een
   rijpe aarbei meer rood en minder groen componenten geven.
-
