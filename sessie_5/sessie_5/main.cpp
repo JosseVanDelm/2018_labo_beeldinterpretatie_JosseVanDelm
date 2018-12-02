@@ -3,6 +3,7 @@
 
 using namespace std;
 using namespace cv;
+using namespace cv::ml;
 
 /* Program options:
 --training_image="/media/josse/Fedora/home/jossevandelm/beeldinterpretatie/2018_labo_beeldinterpretatie_VanDelm_Josse/sessie_5/strawberry1.tif"
@@ -70,46 +71,111 @@ int main(int argc, const char** argv){
         cerr<<"One of the images is not found";
         return -1;
     }
+    // create vectors containing selected points
     vector<Point2d> foregroundPoints;
+    vector<Point2d> backgroundPoints;
     imshow("Add training data",training_image);
     setMouseCallback("Add training data",onMouse,&foregroundPoints);
+    cerr << "Press any key to continue in program" << endl;
+    cerr << "******************" << endl << "SELECT FOREGROUND" << endl << "******************" << endl;
     waitKey(0);
-/*
-    //gaussian blur toevoegen om minder afhankelijk te zijn van pitjes
-    // kies voor  knn 3 classen
+    setMouseCallback("Add training data",onMouse,&backgroundPoints);
+    cerr << "******************" << endl << "SELECT BACKGROUND" << endl << "******************" << endl;
+    waitKey(0);
 
-    //retrieving the hsv pixel values for each position
-    Mat img_hsv
-    cvtColor ...
+    // Add gaussian blur to the image, to reduce effects of outliers (pits of strawberries)
+    Mat img_gaussian;
+    GaussianBlur(training_image,img_gaussian,Size(11,11),0,0);
+    /*imshow("Filtered image",img_gaussian);
+    waitKey(0);*/
+    Mat img_hsv;
+    cvtColor(img_gaussian,img_hsv,CV_BGR2HSV);
 
     //Prepare foreground training data using the HSV values as a descriptor
+    Mat trainingDataForeground(foregroundPoints.size(),3,CV_32FC1);
+    Mat labels_fg = Mat::ones(foregroundPoints.size(),1,CV_32SC1);
 
-    Mat trainingDataForeground(strawberry.size(),3,CV_32FC1); //strawberry zijn de punten geselecteerd.
-    Mat labels_fg = Mat::ones(strawberry.size(),1,CV_32SC1);
-
-    for (int i = 0; i < strawberry.size(); i++) {
-        Vec3b descriptor = img_hsv.at<Vec3b>(strawberry[i].y,strawberry[i].x);
+    for (size_t i = 0; i < foregroundPoints.size(); i++) {
+        Vec3b descriptor = img_hsv.at<Vec3b>(foregroundPoints[i].y,foregroundPoints[i].x);
         trainingDataForeground.at<float>(i,0) = descriptor[0];
-        trainingDataForeground.at<float>(i,0) = descriptor[0];
-        trainingDataForeground.at<float>(i,0) = descriptor[0];
+        trainingDataForeground.at<float>(i,1) = descriptor[1];
+        trainingDataForeground.at<float>(i,2) = descriptor[2];
     }
 
     //Prepare background training data using the HSV values as a descriptor
-    Mat trainingDataBackground(strawberry.size(),3,CV_32FC1); //strawberry zijn de punten geselecteerd.
-    Mat labels_fg = Mat::ones(strawberry.size(),1,CV_32SC1);
+    Mat trainingDataBackground(backgroundPoints.size(),3,CV_32FC1); //strawberry zijn de punten geselecteerd.
+    Mat labels_bg = Mat::ones(backgroundPoints.size(),1,CV_32SC1);
 
-    for (int i = 0; i < strawberry.size(); i++) {
-        Vec3b descriptor = img_hsv.at<Vec3b>(strawberry[i].y,strawberry[i].x);
+    for (size_t i = 0; i < backgroundPoints.size(); i++) {
+        Vec3b descriptor = img_hsv.at<Vec3b>(backgroundPoints[i].y,backgroundPoints[i].x);
         trainingDataBackground.at<float>(i,0) = descriptor[0];
-        trainingDataBackground.at<float>(i,0) = descriptor[0];
-        trainingDataBackground.at<float>(i,0) = descriptor[0];
+        trainingDataBackground.at<float>(i,1) = descriptor[1];
+        trainingDataBackground.at<float>(i,2) = descriptor[2];
     }
 
     // group foreground and background
     Mat trainingData, labels;
     vconcat(trainingDataForeground,trainingDataBackground,trainingData);
     vconcat(labels_fg,labels_bg,labels);
+    cerr << endl;
+    //Now train different classifiers
+    /// Nearest Neighbor classifier
+    Ptr<KNearest> KNN = KNearest::create();
+    KNN->setIsClassifier(true);                 // use classifier instead of regression
+    KNN->setAlgorithmType(KNearest::BRUTE_FORCE); // we use brute force instead of KDTREE
+    KNN->setDefaultK(3);                        // use 3 classes
+    Ptr<TrainData> trainDataKNN = TrainData::create(trainingData, ROW_SAMPLE, labels); //trainingdata is stored as column vector
+    cerr << "Training K Nearest Neighbors Classifier...  ";
+    KNN->train(trainDataKNN);
+    cerr << "done" << endl;
 
-    cerr << "Training a 1 Nearest Neighbor Classifier"
-*/
+    /// Normal Bayes classifier
+    Ptr<NormalBayesClassifier> NB = NormalBayesClassifier::create();
+    cerr << "Training Normal Bayes Classifier...  ";
+    NB->train(trainingData, ROW_SAMPLE,labels);
+    cerr << "done" << endl;
+
+    /// Support Vector Machine classifier
+    Ptr<SVM> SVM = SVM::create();
+    SVM->setType(SVM::C_SVC); //we choose C-Support Vector Classification
+    SVM->setKernel(SVM::LINEAR);
+    SVM->setTermCriteria(TermCriteria(TermCriteria::MAX_ITER,100,1e-6));
+    cerr << "Training Support Vector Machine Classifier...  ";
+    SVM->train(trainingData,ROW_SAMPLE,labels);
+    cerr << "done" << endl << endl;
+
+    //after training we want the classifiers to label each indivudal pixel of the image;
+
+    Size imageSize = Size(training_image.cols,training_image.rows);
+    Mat mask_KNN = Mat::zeros(imageSize,CV_8UC1);
+    Mat mask_NB  = Mat::zeros(imageSize,CV_8UC1);
+    Mat mask_SVM = Mat::zeros(imageSize,CV_8UC1);
+    Mat labels_KNN, labels_NB, labels_SVM;
+    cerr << "Classifying individual pixels...  ";
+    for(int row = 0; row < img_hsv.rows ; row++){
+        for(int col = 0; col < img_hsv.cols; col++){
+            // store individual pixel in CV_32FC1 matrix)
+            Vec3b pixel = img_hsv.at<Vec3b>(row,col);
+            Mat pixel_new(1,3,CV_32FC1);
+            pixel_new.at<float>(0,0) = pixel[0];
+            pixel_new.at<float>(0,1) = pixel[1];
+            pixel_new.at<float>(0,2) = pixel[2];
+            KNN->findNearest(pixel_new, KNN->getDefaultK(), labels_KNN);
+             NB->predict(pixel_new, labels_NB );
+            SVM->predict(pixel_new, labels_SVM);
+            // Now use labels as masks
+            if(labels_KNN.at<float>(row,col) != 0){
+                mask_KNN.at<uchar>(row,col) = 1;
+            }
+            //mask_KNN.at<uchar>(row,col) = labels_KNN.at<float>(row,col);
+            mask_NB.at<uchar>(row,col) =  labels_NB.at<int>(row,col);
+            mask_SVM.at<uchar>(row,col) = labels_SVM.at<float>(row,col);
+        }
+    }
+    cerr << "done" << endl;
+    imshow("Mask k Nearest Neighbor Classifier",mask_KNN*255);
+    imshow("Mask Normal Bayes Classifier",mask_NB*255);
+    imshow("Mask Support Vector Machine Classifier",mask_SVM*255);
+    waitKey(0);
+
 }
