@@ -11,7 +11,7 @@
 				<Option object_output="obj/Debug/" />
 				<Option type="1" />
 				<Option compiler="gcc" />
-				<Option parameters='--model=&quot;/home/student/Github/2018_labo_beeldinterpretatie_VanDelm_Josse/sessie_6/haarcascade_frontalface_alt.xml&quot; --video=&quot;/home/student/Github/2018_labo_beeldinterpretatie_VanDelm_Josse/sessie_6/faces.mp4&quot;' />
+				<Option parameters='--model=&quot;/media/josse/Fedora/home/jossevandelm/beeldinterpretatie/2018_labo_beeldinterpretatie_VanDelm_Josse/sessie_6/haarcascade_frontalface_alt.xml&quot;  --video=&quot;/media/josse/Fedora/home/jossevandelm/beeldinterpretatie/2018_labo_beeldinterpretatie_VanDelm_Josse/sessie_6/faces.mp4&quot; --model2=&quot;/media/josse/Fedora/home/jossevandelm/beeldinterpretatie/2018_labo_beeldinterpretatie_VanDelm_Josse/sessie_6/lbpcascade_frontalface_improved.xml&quot;' />
 				<Compiler>
 					<Add option="-g" />
 				</Compiler>
@@ -36,6 +36,9 @@
 			<Add option="-Wall" />
 			<Add option="-fexceptions" />
 		</Compiler>
+		<Linker>
+			<Add option="`pkg-config opencv --libs`" />
+		</Linker>
 		<Unit filename="main.cpp" />
 		<Extensions>
 			<code_completion />
