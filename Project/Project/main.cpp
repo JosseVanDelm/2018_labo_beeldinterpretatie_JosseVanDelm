@@ -89,41 +89,38 @@ int main(int argc, const char** argv){
 }
 vector<vector<Mat>> initDetectPacman(string neutral_path,string open1_path, string open2_path){
 	// Create variable containing all the patterns
-	vector<vector<Mat>> patterns(FACES,vector<Mat>(DIRECTIONS));
+	vector<vector<Mat>> patterns(FACES);
 	// Read in all the template images (these must be oriented right)
 	// For neutral file
 	Mat neutral = imread(neutral_path);
-	for(int i = 0; i < DIRECTIONS; i++){
-		patterns[NEUTRAL][i] = neutral;
-	}
+	patterns[NEUTRAL].push_back(neutral);
 	// For open1 file
 	Mat open1 = imread(open1_path);
-	patterns[OPEN1][RIGHT] = open1; // >>
+	patterns[OPEN1].push_back(open1); // >>
 	// also add other rotations
 	rotate(open1,open1,ROTATE_90_COUNTERCLOCKWISE);
-	patterns[OPEN1][UP] = open1; // ^^
+	patterns[OPEN1].push_back(open1); // ^^
 	rotate(open1,open1,ROTATE_90_COUNTERCLOCKWISE);
-	patterns[OPEN1][LEFT] = open1; // <<
+	patterns[OPEN1].push_back(open1); // <<
 	rotate(open1,open1,ROTATE_90_COUNTERCLOCKWISE);
-	patterns[OPEN1][DOWN] = open1; // vv
+	patterns[OPEN1].push_back(open1); // vv
 	// For open2 file
 	Mat open2 = imread(open2_path);
-	patterns[OPEN2][RIGHT] = open2; // >>
+	patterns[OPEN2].push_back(open2); // >>
 	// also add other rotations
 	rotate(open2,open2,ROTATE_90_COUNTERCLOCKWISE);
-	patterns[OPEN2][UP] = open2; // ^^
+	patterns[OPEN2].push_back(open2); // ^^
 	rotate(open2,open2,ROTATE_90_COUNTERCLOCKWISE);
-	patterns[OPEN2][LEFT] = open2; // <<
+	patterns[OPEN2].push_back(open2); // <<
 	rotate(open2,open2,ROTATE_90_COUNTERCLOCKWISE);
-	patterns[OPEN2][DOWN] = open2; // vv
+	patterns[OPEN2].push_back(open2); // vv
 	// now convert them to grayscale
-	vector<vector<Mat>> patterns_gs;
 	for(size_t i = 0; i < patterns.size(); i++){
 		for(size_t j = 0; j < patterns[i].size();j++){
-			cvtColor(patterns[i][j],patterns_gs[i][j],CV_BGR2GRAY);
+			cvtColor(patterns[i][j],patterns[i][j],CV_BGR2GRAY);
 		}
 	}
-	return patterns_gs;
+	return patterns;
 }
 
 Rect detectPacman(Mat frame,vector<vector<Mat>> patterns)
@@ -131,12 +128,15 @@ Rect detectPacman(Mat frame,vector<vector<Mat>> patterns)
 	// Create matching_image and template_image in grayscale
 	Mat mi_gs;
 	cvtColor(frame,mi_gs,CV_BGR2GRAY);
+	// now for each template calculate correlation
 	for(size_t i = 0; i < patterns.size(); i++){
 		for(size_t j = 0; j < patterns[i].size();j++){
 			Mat result_gs;
 			// use cross correlation to match templates
 			matchTemplate(mi_gs,patterns[i][j],result_gs,TM_CCOEFF);
 			normalize(result_gs,result_gs,0,1,NORM_MINMAX,-1,Mat());
+			imshow("PacDAR",result_gs);
+			waitKey(1);
 		}
 	}
 	Rect returned = Rect(1,2,3,4);
