@@ -2,3 +2,5 @@
 --neutral_temp="/media/josse/Fedora/home/jossevandelm/beeldinterpretatie/2018_labo_beeldinterpretatie_VanDelm_Josse/Project/patterns/neutral.png"
 --open1_temp="/media/josse/Fedora/home/jossevandelm/beeldinterpretatie/2018_labo_beeldinterpretatie_VanDelm_Josse/Project/patterns/open1right.png"
 --open2_temp="/media/josse/Fedora/home/jossevandelm/beeldinterpretatie/2018_labo_beeldinterpretatie_VanDelm_Josse/Project/patterns/open2right.png"
+
+`pkg-config opencv --libs`

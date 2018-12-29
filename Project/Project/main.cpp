@@ -15,8 +15,8 @@
 using namespace std;
 using namespace cv;
 
-void initDetectPacman(string neutral_path,string open1_path, string open2_path);
-Rect detectPacman(Mat frame);
+vector<vector<Mat>> initDetectPacman(string neutral_path,string open1_path, string open2_path);
+Rect detectPacman(Mat frame,vector<vector<Mat>> patterns);
 
 int main(int argc, const char** argv){ 
 	//Command line parser
@@ -53,6 +53,7 @@ int main(int argc, const char** argv){
     // Initialize first frame
     Mat frame;
     cap >> frame;
+    vector<vector<Mat>> patterns = initDetectPacman(neutral_location,open1_location,open2_location);
     // Initialize cropping region
     // This region removes black borders and bottom with lives displayed;
     // The bottom would interfere with pacman detection
@@ -67,7 +68,7 @@ int main(int argc, const char** argv){
       imshow("PacPacman",cropped);
       // 2: Detect pacman figure
       Rect detection;
-      detection = detectPacman(cropped);
+      detection = detectPacman(cropped,patterns);
       // Press  ESC on keyboard to exit
       // use waitkey with 25 seconds to wait for 25 seconds (to show smooth video)
       // TODO replace waitkey(0)
@@ -86,43 +87,58 @@ int main(int argc, const char** argv){
 	    cerr << "User interrupted execution. Quitting..." << endl;
     }
 }
-
-Mat rotate(Mat src, double angle)
-{
-    // Only works for 90,180 and 270 degrees!
-    Mat dst;
-    Point2f pt(src.cols/2., src.rows/2.);
-    Mat r = getRotationMatrix2D(pt, angle, 1.0);
-    if(angle == 90 || angle == 270){
-	    warpAffine(src, dst, r, Size(src.rows,src.cols));
-    }
-    else if(angle == 180){
-	    warpAffine(src,dst, r, Size(src.cols,src.rows));
-    }
-    return dst;
-}
-
-void initDetectPacman(string neutral_path,string open1_path, string open2_path){
-	// Create all necessary rotation matrices
-	
+vector<vector<Mat>> initDetectPacman(string neutral_path,string open1_path, string open2_path){
 	// Create variable containing all the patterns
-	Mat patterns[FACES][DIRECTIONS];
+	vector<vector<Mat>> patterns(FACES,vector<Mat>(DIRECTIONS));
 	// Read in all the template images (these must be oriented right)
 	// For neutral file
 	Mat neutral = imread(neutral_path);
-	patterns[NEUTRAL][0] = neutral;
+	for(int i = 0; i < DIRECTIONS; i++){
+		patterns[NEUTRAL][i] = neutral;
+	}
 	// For open1 file
 	Mat open1 = imread(open1_path);
-	patterns[NEUTRAL][RIGHT] = open1;
+	patterns[OPEN1][RIGHT] = open1; // >>
+	// also add other rotations
+	rotate(open1,open1,ROTATE_90_COUNTERCLOCKWISE);
+	patterns[OPEN1][UP] = open1; // ^^
+	rotate(open1,open1,ROTATE_90_COUNTERCLOCKWISE);
+	patterns[OPEN1][LEFT] = open1; // <<
+	rotate(open1,open1,ROTATE_90_COUNTERCLOCKWISE);
+	patterns[OPEN1][DOWN] = open1; // vv
+	// For open2 file
+	Mat open2 = imread(open2_path);
+	patterns[OPEN2][RIGHT] = open2; // >>
+	// also add other rotations
+	rotate(open2,open2,ROTATE_90_COUNTERCLOCKWISE);
+	patterns[OPEN2][UP] = open2; // ^^
+	rotate(open2,open2,ROTATE_90_COUNTERCLOCKWISE);
+	patterns[OPEN2][LEFT] = open2; // <<
+	rotate(open2,open2,ROTATE_90_COUNTERCLOCKWISE);
+	patterns[OPEN2][DOWN] = open2; // vv
+	// now convert them to grayscale
+	vector<vector<Mat>> patterns_gs;
+	for(size_t i = 0; i < patterns.size(); i++){
+		for(size_t j = 0; j < patterns[i].size();j++){
+			cvtColor(patterns[i][j],patterns_gs[i][j],CV_BGR2GRAY);
+		}
+	}
+	return patterns_gs;
 }
-	
-Rect detectPacman(Mat frame)
+
+Rect detectPacman(Mat frame,vector<vector<Mat>> patterns)
 {
 	// Create matching_image and template_image in grayscale
 	Mat mi_gs;
 	cvtColor(frame,mi_gs,CV_BGR2GRAY);
-	Mat ti_gs;
-	//ti_gs =
+	for(size_t i = 0; i < patterns.size(); i++){
+		for(size_t j = 0; j < patterns[i].size();j++){
+			Mat result_gs;
+			// use cross correlation to match templates
+			matchTemplate(mi_gs,patterns[i][j],result_gs,TM_CCOEFF);
+			normalize(result_gs,result_gs,0,1,NORM_MINMAX,-1,Mat());
+		}
+	}
 	Rect returned = Rect(1,2,3,4);
 	return returned;
 }
