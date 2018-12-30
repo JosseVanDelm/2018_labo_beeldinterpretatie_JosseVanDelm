@@ -120,7 +120,20 @@ vector<vector<Mat>> initDetectPacman(string neutral_path,string open1_path, stri
 	// now convert them to grayscale
 	for(size_t i = 0; i < patterns.size(); i++){
 		for(size_t j = 0; j < patterns[i].size();j++){
-			cvtColor(patterns[i][j],patterns[i][j],CV_BGR2GRAY);
+			//use H channel for Segmentation
+			Mat hsv;
+			cvtColor(patterns[i][j],hsv,CV_BGR2HSV);
+			imshow("hsv",hsv);
+			Mat mask = Mat::zeros(Size(patterns[i][j].cols,patterns[i][j].rows),CV_8UC1);
+			inRange(hsv,Scalar(26,0,0),Scalar(36,255,255),mask);
+			Mat masked;
+			// apply mask
+			patterns[i][j].copyTo(masked,mask);
+			imshow("patterns masked",masked);
+			cvtColor(masked,patterns[i][j],CV_BGR2GRAY);
+			// optional: show patterns
+			imshow("patterns",patterns[i][j]);
+			waitKey(1);
 		}
 	}
 	return patterns;
@@ -129,8 +142,21 @@ vector<vector<Mat>> initDetectPacman(string neutral_path,string open1_path, stri
 Rect detectPacman(Mat frame,vector<vector<Mat>> patterns)
 {
 	// Create matching_image and template_image in grayscale
-	Mat mi_gs;
-	cvtColor(frame,mi_gs,CV_BGR2GRAY);
+	Mat mi;
+	//use HSV for Segmentation
+	Mat hsv;
+	cvtColor(frame,hsv,CV_BGR2HSV);
+	imshow("hsv",hsv);
+	Mat mask = Mat::zeros(Size(frame.cols,frame.rows),CV_8UC1);
+	inRange(hsv,Scalar(26,0,0),Scalar(36,255,255),mask);
+	Mat masked;
+	// apply mask
+	frame.copyTo(masked,mask);
+	imshow("frame masked",masked);
+	cvtColor(masked,mi,CV_BGR2GRAY);
+	// optional: show patterns
+	imshow("frame",mi);
+	waitKey(1);
 	// now for each template calculate correlation
 	double maxValtemp = 0;
 	Point maxLoctemp;
@@ -140,16 +166,16 @@ Rect detectPacman(Mat frame,vector<vector<Mat>> patterns)
 			// initialize variables
 			double maxVal,minVal;
 			Point minLoc,maxLoc;
-			Mat result_gs;
+			Mat result;
 			// use cross correlation to match templates
-			matchTemplate(mi_gs,patterns[i][j],result_gs,TM_CCOEFF);
-			normalize(result_gs,result_gs,0,1,NORM_MINMAX,-1,Mat());
+			matchTemplate(mi,patterns[i][j],result,TM_CCOEFF);
+			normalize(result,result,0,1,NORM_MINMAX,-1,Mat());
 			// optional: show results
-			// imshow("PacDAR",result_gs);
-			// waitKey(1);
+			imshow("PacDAR",result);
+			waitKey(1);
 
 			// find maximum in the set of templates to tell which movement is made
-			minMaxLoc(result_gs,&minVal,&maxVal,&minLoc,&maxLoc);
+			minMaxLoc(result,&minVal,&maxVal,&minLoc,&maxLoc);
 			if(maxValtemp < maxVal){
 				maxValtemp = maxVal;
 				maxLoctemp = maxLoc;
@@ -173,7 +199,7 @@ Rect detectPacman(Mat frame,vector<vector<Mat>> patterns)
 	if(face == NEUTRAL){
 		cerr << "n" << endl;
 	}
-	waitKey(0);
+	waitKey(1);
 	// make rectangle with coordinates from maximum!
 	Rect returned = Rect(maxLoctemp.x,maxLoctemp.y,18,18);
 	return returned;
