@@ -2,9 +2,9 @@
 #include <opencv2/opencv.hpp>
 
 #define DIRECTIONS 4
-#define LEFT 0
-#define RIGHT 1
-#define UP 2
+#define LEFT 2
+#define RIGHT 0
+#define UP 1
 #define DOWN 3 
 
 #define FACES 3
@@ -65,10 +65,13 @@ int main(int argc, const char** argv){
       // 1: Crop the frame
       Mat cropped = frame(CropReg);
       // Display the cropped frame (optional)
-      imshow("PacPacman",cropped);
+      // imshow("PacPacman",cropped);
       // 2: Detect pacman figure
       Rect detection;
       detection = detectPacman(cropped,patterns);
+      rectangle(cropped,detection,Scalar(0,255,0));
+      imshow("Detection",cropped); 
+
       // Press  ESC on keyboard to exit
       // use waitkey with 25 seconds to wait for 25 seconds (to show smooth video)
       // TODO replace waitkey(0)
@@ -129,16 +132,49 @@ Rect detectPacman(Mat frame,vector<vector<Mat>> patterns)
 	Mat mi_gs;
 	cvtColor(frame,mi_gs,CV_BGR2GRAY);
 	// now for each template calculate correlation
+	double maxValtemp = 0;
+	Point maxLoctemp;
+	int face,direction;
 	for(size_t i = 0; i < patterns.size(); i++){
 		for(size_t j = 0; j < patterns[i].size();j++){
+			// initialize variables
+			double maxVal,minVal;
+			Point minLoc,maxLoc;
 			Mat result_gs;
 			// use cross correlation to match templates
 			matchTemplate(mi_gs,patterns[i][j],result_gs,TM_CCOEFF);
 			normalize(result_gs,result_gs,0,1,NORM_MINMAX,-1,Mat());
-			imshow("PacDAR",result_gs);
-			waitKey(1);
+			// optional: show results
+			// imshow("PacDAR",result_gs);
+			// waitKey(1);
+
+			// find maximum in the set of templates to tell which movement is made
+			minMaxLoc(result_gs,&minVal,&maxVal,&minLoc,&maxLoc);
+			if(maxValtemp < maxVal){
+				maxValtemp = maxVal;
+				maxLoctemp = maxLoc;
+				face = i;
+				direction = j;
+			}
 		}
 	}
-	Rect returned = Rect(1,2,3,4);
+	if(face == OPEN1 || face == OPEN2){
+		switch(direction) {
+			case UP:
+			       cerr << "^" << endl;break;
+			case DOWN:
+			       cerr << "v" << endl;break;
+			case LEFT:
+			       cerr << "<" << endl;break;
+			case RIGHT:
+			       cerr << ">" << endl;
+		}
+	}
+	if(face == NEUTRAL){
+		cerr << "n" << endl;
+	}
+	waitKey(0);
+	// make rectangle with coordinates from maximum!
+	Rect returned = Rect(maxLoctemp.x,maxLoctemp.y,18,18);
 	return returned;
 }

@@ -11,6 +11,7 @@
 				<Option object_output="obj/Debug/" />
 				<Option type="1" />
 				<Option compiler="gcc" />
+				<Option parameters='--video=&quot;/media/josse/Fedora/home/jossevandelm/beeldinterpretatie/2018_labo_beeldinterpretatie_VanDelm_Josse/Project/pacman.mp4&quot; --neutral_temp=&quot;/media/josse/Fedora/home/jossevandelm/beeldinterpretatie/2018_labo_beeldinterpretatie_VanDelm_Josse/Project/patterns/neutral.png&quot; --open1_temp=&quot;/media/josse/Fedora/home/jossevandelm/beeldinterpretatie/2018_labo_beeldinterpretatie_VanDelm_Josse/Project/patterns/open1right.png&quot; --open2_temp=&quot;/media/josse/Fedora/home/jossevandelm/beeldinterpretatie/2018_labo_beeldinterpretatie_VanDelm_Josse/Project/patterns/open2right.png&quot; ' />
 				<Compiler>
 					<Add option="-g" />
 				</Compiler>
